@@ -1,0 +1,270 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>AVElectraFeed</title>
+    <style>
+        table#avelectratable {
+            font-family: arial, sans-serif;
+            font-size: small;
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th {
+            background-color: #4f6487;
+        }
+        td, th {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 2px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #dddddd;
+        }
+    </style>
+</head>
+<body>
+
+<div>
+    <h2>Search by: <br/>
+    </h2>
+    <p>Customer ID Account Number From Date End Date</p>
+    <input type="text" id="custId" name="Customer ID" size="10"/>
+    <input type="text" id="accNumber" name="Account Number" size=10"/>'
+    <input type="date" id="fromDate" name="From Date" size="5"/>'
+    <input type="date" id="toDate" name="To Date" size="5"/>'
+    <input type="button" value="Search" onclick="find();"/>
+    <p id="product"/>
+</div>
+    <div>
+        <h2>Transactions</h2>
+        <!--<ul id="avelectra" />-->
+    </div>  
+<div>
+    <table id="avelectratable">
+        </table>
+    </div>
+    <div>
+        <h2> Get Accounts</h2>
+        <input type="text" id="getAccountscustId" name="Customer ID" size="10"/>
+        <input type="button" value="Get Accounts" onclick="findAccounts();" />
+    </div>
+    <div>
+        <h2>Custodians and Accounts</h2>
+        <table id="avelectraaccounts" ></table>
+    </div>
+<div>
+    <h2> Get Customers</h2>
+    <input type="button" value="Get Customers" onclick="findCustomers();" />
+    <ul id="avelectracustomers" />
+
+</div>
+<div>
+    <h2>Get Holdings file</h2>
+    <p>Customer ID Date</p>
+    <input type="text" id="custIdHoldings" name="Customer ID" size="10"/>
+    <input type="date" id="holdingsDate" name="Date" size="5"/>'
+    <input type="button" value="Get" onclick="findHoldings();"/>
+    <table id="avelectraholdings"></table>
+</div>
+<div>
+    <h2>Get Price file</h2>
+    <p>Customer ID Date</p>
+    <input type="text" id="custIdPrices" name="Customer ID" size="10"/>
+    <input type="date" id="priceDate" name="Date" size="5"/>'
+    <input type="button" value="Get" onclick="findPrices();"/>
+    <table id="avelectraprices"></table>
+</div>
+    <div>
+        <h2>Get Cash file</h2>
+        <p>Customer ID Date</p>
+        <input type="text" id="custIdCash" name="Customer ID" size="10" />
+        <input type="date" id="cashDate" name="Date" size="5" />'
+        <input type="button" value="Get" onclick="findCash();" />
+        <table id="avelectracash"></table>
+    </div>
+<script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.0.3.min.js"></script>
+    <script>
+    var uri = 'api/AVElectra';
+
+    $(document).ready(function () {
+      // Send an AJAX request
+      $.getJSON(uri)
+          .done(function (data) {
+            // On success, 'data' contains a list of rows.
+            $.each(data, function (key, item) {
+              // Add a list item .
+                $('<li>', { text: formatItem(item) }).appendTo($('#avelectra'));
+            });
+          });
+    });
+
+    function formatItem(item) {
+        return item.CustomerId + ', ' + item.Custodian + ', ' + item.AccountNumber + ', ' + item.TransType + ', ' + item.SecurityType + ', ' + item.Symbol + ', ' + item.TradeDate + ', ' +
+            item.SettlementDate + ', ' + item.Units + ', ' + item.Amount + ', ' + item.CurrencyCode + ', ' + item.Name + ', ' + item.Description + ', ' + item.CheckNumber + ', ' + item.TransSubType + ', ' + item.AccruedInterest + ', ' + item.EndDate + ', '
+            + item.OriginalSecType + ', ' + item.OriginalTranType + ', ' + item.TransactionId;
+    }
+    
+    function addHeader(transHeader, tableString) {
+        var table = document.getElementById(tableString);
+        var thead = document.createElement('thead');
+        table.appendChild(thead);
+
+        for (var i = 0; i < transHeader.length; i++) {
+            thead.appendChild(document.createElement("th")).
+                appendChild(document.createTextNode(transHeader[i]));
+        }
+    }
+        function addRows(item, tableString) {
+            var table = document.getElementById(tableString);
+
+            var row = table.insertRow(-1);
+            var i = 0;
+            for (var key in item) {
+                if (item.hasOwnProperty(key)) {
+                    var cell = row.insertCell(i);
+                    cell.innerHTML = item[key];
+                    i++;
+                }
+            }
+
+                    }
+    function find() {
+        $('#avelectratable').empty();
+        var transHeader = ["Customer Id", "Custodian", "Account Number ", "Trans Type", "Security Type", "Symbol",
+            "Trade Date", "Settlement Date", "Units", "Amount", "Currency Code", "Name", "Description", "Check Number",
+            "Tran Sub-Type", "Accrued Interest", "End Date", "Original Sec Type", "Original Tran Type", "Transaction ID"];
+        addHeader(transHeader, "avelectratable");
+        var customerId = $('#custId').val();
+        var accountNumber = $('#accNumber').val();
+        var startDate = $('#fromDate').val();
+        var endDate = $('#toDate').val();
+        var parameters = '?accountNumber=' + accountNumber + '&startDate=' + startDate + '&endDate=' + endDate; 
+        $.getJSON(uri + '/' + customerId + parameters)
+          .done(function (data) {
+                $.each(data,
+                    function(key, item) {
+                        // Add a list item .
+                        //$('<li>', { text: formatItem(item) }).appendTo($('#avelectra'));
+                        addRows(item, "avelectratable");
+                    });
+            })
+          .fail(function (jqXHR, textStatus, err) {
+              $('#avelectra').text('Error: ' + err);
+          });
+    }
+
+    function formatAccounts(item) {
+        return item.Custodian + ', ' + item.AccountNumber;
+    }
+
+    function findAccounts() {
+        $('#avelectraaccounts').empty();
+        var transHeader = ["Custodian", "Account Number"];
+        addHeader(transHeader, "avelectraaccounts");
+        var customerId = $('#getAccountscustId').val();
+        $.getJSON(uri + '/' + customerId)
+          .done(function (data) {
+              $.each(data,
+                  function (key, item) {
+                      // Add a list item .
+                      //$('<li>', { text: formatAccounts(item) }).appendTo($('#avelectraaccounts'));
+                      addRows(item, "avelectraaccounts");
+                  });
+          })
+          .fail(function (jqXHR, textStatus, err) {
+              $('#avelectraaccounts').text('Error: ' + err);
+          });
+    }
+
+    function formatCustomers(item) {
+        return item.Customer;
+    }
+    function findCustomers() {
+        $('#avelectracustomers').empty();
+        $.getJSON('api/GetCustomers')
+            .done(function (data) {
+                $.each(data,
+                    function (key, item) {
+                        // Add a list item .
+                        $('<li>', { text: formatCustomers(item) }).appendTo($('#avelectracustomers'));
+                    });
+            })
+            .fail(function (jqXHR, textStatus, err) {
+                $('#avelectracustomers').text('Error: ' + err);
+            });
+    }
+
+    function findHoldings() {
+        $('#avelectraholdings').empty();
+        var transHeader = ["Customer ID", "Account No", "Accrued Int Local", "Accrued Int Base", "As of Date", "Cost Base",
+            "Cost Local", "Coupon", "Curr Base", "Curr Local", "Quantity", "Cusip", "Factor", "Exchange Rate",
+            "ISIN", "Market Value Local", "Market Value Base", "Maturity Date", "Original Face", "Price Local",
+            "Price Base", "Price Date", "Security Description", "Security ID", "Security Type", "Sedol", "Ticker", "Original Sec Type",
+        "CUSTODIAN"];
+        addHeader(transHeader, "avelectraholdings");
+        var customerId = $('#custIdHoldings').val();
+        var date = $('#holdingsDate').val();
+        //var parameters = '?date=' + date;
+
+        $.getJSON('api/GetHoldings' + '/' + customerId + '/' + date)
+            .done(function (data) {
+                $.each(data,
+                    function (key, item) {
+                        // Add a list item .
+                        //$('<li>', { text: formatCustomers(item) }).appendTo($('#avelectraholdings'));
+                        addRows(item, "avelectraholdings");
+                    });
+            })
+            .fail(function (jqXHR, textStatus, err) {
+                $('#avelectraholdings').text('Error: ' + err);
+            });
+    }
+
+    function findPrices() {
+        $('#avelectraprices').empty();
+        var transHeader = ["Customer ID", "Custodian", "Symbol", "Symbol Type", "Close Price", "Price As Of Date", "Currency Code"];
+        addHeader(transHeader, "avelectraprices");
+        var customerId = $('#custIdPrices').val();
+        var date = $('#priceDate').val();
+        //var parameters = '?date=' + date;
+
+        $.getJSON('api/GetPrices' + '/' + customerId + '/' + date)
+            .done(function (data) {
+                $.each(data,
+                    function (key, item) {
+                        // Add a list item .
+                        //$('<li>', { text: formatCustomers(item) }).appendTo($('#avelectraholdings'));
+                        addRows(item, "avelectraprices");
+                    });
+            })
+            .fail(function (jqXHR, textStatus, err) {
+                $('#avelectraprices').text('Error: ' + err);
+            });
+    }
+
+
+    function findCash() {
+        $('#avelectracash').empty();
+        var transHeader = ["Customer ID", "Account No", "Cash Balance Currency", "Cash Balance Date", "Cash Close Amount BNK", "Custodian"];
+        addHeader(transHeader, "avelectracash");
+        var customerId = $('#custIdCash').val();
+        var date = $('#cashDate').val();
+        //var parameters = '?date=' + date;
+
+        $.getJSON('api/GetCash' + '/' + customerId + '/' + date)
+            .done(function (data) {
+                $.each(data,
+                    function (key, item) {
+                        // Add a list item .
+                        //$('<li>', { text: formatCustomers(item) }).appendTo($('#avelectraholdings'));
+                        addRows(item, "avelectracash");
+                    });
+            })
+            .fail(function (jqXHR, textStatus, err) {
+                $('#avelectracash').text('Error: ' + err);
+            });
+    }
+    </script>
+</body>
+</html>
