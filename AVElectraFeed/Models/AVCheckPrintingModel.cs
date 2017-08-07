@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
-using SmartFormat;
 
-namespace AVElectraApp.Models
+namespace AVCheckPrinting.Models
 {
     public struct CheckDistributionItem
     {
