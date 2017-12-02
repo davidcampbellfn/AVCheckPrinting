@@ -29,26 +29,35 @@
     <h2>Enter Check Info: <br/>
     </h2>
     <p>Check # ID Routing number Account Number Journal Name</p>
-    <input type="text" id="check.checkNumber" name="Check Number" size="10"/>
-    <input type="text" id="check.routingNumber" name="Routing Number" size="10" />'
-    <input type="text" id="check.accountNumber" name="Account Number" size="10"/>'
-    <input type="text" id="check.journalName" name="Journal Name" size="10" />'
+    <input type="text" id="CheckNumber" name="Check Number" size="10"/>
+    <input type="text" id="RoutingNumber" name="Routing Number" size="10" />'
+    <input type="text" id="AccountNumber" name="Account Number" size="10"/>'
+    <input type="text" id="JournalName" name="Journal Name" size="10" />'
+    <input type="text" id="TemplateNumber" name="Template Number" size="10" />'
     <input type="button" value="Send" onclick="send();"/>
     <p id="product"/>
 </div>
 
 <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.0.3.min.js"></script>
     <script>
-        var uri = 'api/GetAVCheckPrinting';
-        var check = { checkNumber: "1234", routingNumber: "123456789", accountNumber: "987654321", journalName: "Mychecking" };
+        var uri = 'api/AVCheckPrinting';
+  
         function send() {
-           
+            var check = {
+                CheckNumber: $("#CheckNumber").val(),
+                RoutingNumber: $("#RoutingNumber").val(),
+                AccountNumber: $("#AccountNumber").val(),
+                JournalName: $("#JournalName").val(),
+                TemplateNumber: $("#TemplateNumber").val()
+            };
+            var DTO = JSON.stringify(check);
             // Send an AJAX request
             $.ajax({
-                type: "GET",
+                type: 'POST',
                 datatype: "json",
                 url: uri,
-                data: check,
+                data: DTO,
+                contentType: 'application/json; charset=utf-8',
                 success: function (data) {
                     alert(data);
                 },
